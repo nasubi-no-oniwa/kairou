@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#fff4dc">
+<meta name="description" content="通路をまわして、どこまでも走れ。壁も天井も床になる、無限に続く回廊を走るゲーム。">
+<title>回廊快走（かいろうかいそう）</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta property="og:title" content="回廊快走（かいろうかいそう）">
+<meta property="og:description" content="通路をまわして、どこまでも走れ。">
+<meta property="og:image" content="https://nasubi-no-oniwa.github.io/kairou/icons/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="hud">
+  <div class="dist"><b id="dist">0</b><small>m</small></div>
+  <div class="best" id="best"></div>
+  <div class="coin-hud"><i></i><b id="coins">0</b></div>
+  <div class="stage-name" id="stage-name"></div>
+</div>
+<div id="missions"></div>
+<div class="area-name" id="area-name"></div>
+<div class="pop" id="pop"></div>
+<div id="opp" class="opp-chip"></div>
+<div id="bonus" class="bonus-chip"></div>
+<div id="count" class="count"></div>
+<div id="jump-btn">ジャンプ</div>
+<div id="hint-l" class="hint-zone">← すべらせて横移動 →</div>
+<div id="hint-r" class="hint-zone">⇆ スワイプで回転</div>
+
+<section id="title" class="screen show">
+  <div class="box">
+    <p class="kana">かいろうかいそう</p>
+    <h1 class="logo">回廊<span>快走</span></h1>
+    <p class="tag">通路をまわして、どこまでも走れ。</p>
+    <canvas id="title-blob" width="160" height="150"></canvas>
+    <button class="btn primary" id="btn-start">無限回廊を走る</button>
+    <button class="btn ghost" id="btn-ghost" hidden>ベストのコースで、ゴーストと走る</button>
+    <button class="btn vs" id="btn-vs">あいことばで対戦</button>
+    <p class="best-line" id="best-title"></p>
+    <div class="howto">
+      <div><h3>スマホ</h3><p>画面の<b>左半分</b>：指を左右にすべらせて横に動く<br>画面の<b>右半分</b>：左右にスワイプで通路が90度まわる<br>右下の<b>ジャンプ</b>ボタンでジャンプ</p></div>
+      <div><h3>PC</h3><p>← → で横に動く　スペースでジャンプ<br>Q・E（または A・D）で通路をまわす</p></div>
+      <div><h3>あいことばで対戦</h3><p>2人が同じコースを同時に走る。先にやられたら、相手に<b>30秒のボーナスタイム</b>（コインがたくさん）。最後のスコア（距離＋コイン）が多い方の勝ち。</p></div>
+      <p class="note">床に穴があったら、まわして壁を床にしよう。赤い低い箱はジャンプでこえられる。紫と緑の高いかべはよけるしかない。ひびの入った床は近づくとくずれる。黄色の矢印はジャンプ台。<br>コインは1枚1mとして、最後に記録に足されます。</p>
+    </div>
+    <a class="home-link" href="https://nasubi-no-oniwa.github.io/">🍆 なすびのお庭へ</a>
+  </div>
+</section>
+<section id="over" class="screen">
+  <div class="box">
+    <h2 id="over-title">ドボン！</h2>
+    <div class="bill">
+      <div class="line"><span>走った距離</span><b id="b-dist">0m</b></div>
+      <div class="line"><span>コイン <i class="ci"></i>×<em id="b-coins">0</em></span><b id="b-coin-m">+0m</b></div>
+      <div class="line"><span>ミッション <em id="b-mis">0</em>こ</span><b id="b-mis-m">+0m</b></div>
+      <div class="total"><span>きろく</span><b><em id="b-total">0</em>m</b></div>
+    </div>
+    <p id="over-best"></p>
+    <ul class="mis-result" id="mis-result"></ul>
+    <p id="over-area"></p>
+    <button class="btn primary" id="btn-retry">もう一回</button>
+    <button class="btn ghost" id="btn-ghost2" hidden>ベストのコースで、ゴーストと走る</button>
+    <button class="btn sub" id="btn-title">タイトルへ</button>
+  </div>
+</section>
+<section id="ov-online" class="screen">
+  <div class="box">
+    <h2 class="sub-title">あいことばで対戦</h2>
+    <div id="online-form" class="col">
+      <label class="field-l">あいことば<input id="in-code" maxlength="20" autocomplete="off" placeholder="例：かいろう123"></label>
+      <label class="field-l">なまえ<input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし"></label>
+      <p class="hint">同じあいことばを入れた人と対戦します（2人まで）。</p>
+      <button class="btn primary" id="btn-join">はいる</button>
+    </div>
+    <div id="online-wait" class="col" hidden>
+      <p class="wait-code">あいことば「<b id="wait-code"></b>」</p>
+      <p class="wait-msg" id="wait-msg">あいてを待っています…</p>
+      <button class="btn sub" id="btn-copy">さそうリンクをコピー</button>
+    </div>
+    <p class="err" id="online-err"></p>
+    <button class="btn sub" id="btn-online-close">もどる</button>
+  </div>
+</section>
+<section id="vs-wait" class="screen">
+  <div class="box">
+    <h2 class="sub-title" id="w-title">ドボン！</h2>
+    <p class="hint">相手のボーナスタイムが終わるまで待っています</p>
+    <div class="race">
+      <div class="who me"><span id="w-me-n">あなた</span><b id="w-me">0</b><small>m</small></div>
+      <div class="vsmark">VS</div>
+      <div class="who op"><span id="w-op-n">あいて</span><b id="w-op">0</b><small>m</small></div>
+    </div>
+    <p class="wait-left" id="w-left">のこり 30秒</p>
+  </div>
+</section>
+<section id="vs-result" class="screen">
+  <div class="box">
+    <h2 id="r-title">かち！</h2>
+    <table class="vs-table">
+      <tr><th></th><th id="r-me-n">あなた</th><th id="r-op-n">あいて</th></tr>
+      <tr><td>走った距離</td><td id="r-me-d">0m</td><td id="r-op-d">0m</td></tr>
+      <tr><td>コイン</td><td id="r-me-c">0</td><td id="r-op-c">0</td></tr>
+      <tr class="sc"><td>スコア</td><td id="r-me-s">0m</td><td id="r-op-s">0m</td></tr>
+    </table>
+    <p class="hint" id="r-note"></p>
+    <button class="btn primary" id="btn-rematch">もう一回</button>
+    <button class="btn sub" id="btn-vs-title">タイトルへ</button>
+  </div>
+</section>
+<script src="js/stages.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/music.js"></script>
+<script src="js/online.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
