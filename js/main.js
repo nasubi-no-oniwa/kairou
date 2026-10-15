@@ -146,7 +146,7 @@
     if (!firebase.apps.length) firebase.initializeApp(MK.FIREBASE_CONFIG);
     return MK._db = firebase.database();
   }
-  function leaveRoom() { if (room) { room.leave(); room = null; } vs = null; document.body.classList.remove('vs'); $('bonus').classList.remove('show'); $('count').classList.remove('show'); clearTimeout(hideTm); }
+  function leaveRoom() { QM.ended(); if (room) { room.leave(); room = null; } vs = null; document.body.classList.remove('vs'); $('bonus').classList.remove('show'); $('count').classList.remove('show'); clearTimeout(hideTm); }
   const lobby = w => { $('online-form').hidden = w; $('online-wait').hidden = !w; };
   function openOnline(code) {
     lobby(false); $('online-err').textContent = '';
@@ -187,6 +187,7 @@
   }
   function startVs(gm) {
     const r = room; leaveRoomKeep();
+    QM.started({ code: r && r.code, watch: gm.slot < 0 });
     run = new MK.Run(gm.seed); mode = 'vs'; ghost = null; rec = null;
     vs = { slot: gm.slot, round: gm.round, names: gm.names.map(n => n || '？'), startAt: performance.now() + gm.wait, oppSt: null, oppAt: 0, oppEnd: null, myEnd: null, bonusUntil: 0, ox: 0, oh: 0, lastCount: -1, go: false };
     ang = 0; dead = false; shake = 0; coinPitch = 0; parts = []; acc = 0; missions = []; drawMissions();
@@ -241,18 +242,30 @@
   function showVsResult() {
     $('vs-wait').classList.remove('show'); document.body.classList.remove('playing');
     const me = vs.myEnd, op = vs.oppEnd, t = $('r-title');
-    const res = me.sc > op.sc ? 'win' : me.sc < op.sc ? 'lose' : 'draw';
+    // ランダム対戦で相手が抜けたら、残った人の勝ち
+    const res = vs.oppLeft && QM.isRandom() ? 'win' : me.sc > op.sc ? 'win' : me.sc < op.sc ? 'lose' : 'draw';
     t.textContent = res === 'win' ? 'かち！' : res === 'lose' ? 'まけ…' : 'ひきわけ'; t.className = res;
     $('r-me-n').textContent = vs.names[vs.slot] + '（あなた）'; $('r-op-n').textContent = vs.names[1 - vs.slot];
     $('r-me-d').textContent = me.d + 'm'; $('r-op-d').textContent = op.d + 'm'; $('r-me-c').textContent = '×' + me.c; $('r-op-c').textContent = '×' + op.c;
     $('r-me-s').textContent = me.sc + 'm'; $('r-op-s').textContent = op.sc + 'm';
     $('r-me-s').className = res === 'win' ? 'win' : ''; $('r-op-s').className = res === 'lose' ? 'win' : '';
-    $('r-note').textContent = vs.oppLeft ? '相手が退室しました' : '';
+    $('r-note').textContent = vs.oppLeft ? (QM.isRandom() ? '相手が抜けたので、あなたの勝ち！' : '相手が退室しました') : '';
     $('btn-rematch').hidden = !!vs.oppLeft; $('btn-rematch').disabled = false;
     $('vs-result').classList.add('show'); res === 'lose' ? beep(330, 0.4, 'triangle', 0.07, 0, 200) : snd.total();
   }
   $('btn-rematch').onclick = () => { if (!room) return; room.rematch(); $('btn-rematch').disabled = true; $('r-note').textContent = 'あいての「もう一回」を待っています…'; };
   $('btn-vs-title').onclick = () => toTitle();
+
+  // ---------- だれかと対戦（ランダム対戦） ----------
+  QM.setup({
+    game: 'kairou', ver: 'v1', name: '回廊快走',
+    getDb, anchor: '#btn-vs', anchorWhere: 'before', btnClass: 'btn vs', nextClass: 'btn primary', nameKey: 'kk_name',
+    join: (code, name) => { ac(); $('in-code').value = code; $('in-name').value = name; joinOnline(); },
+    cpu: () => $('btn-start').click(), cpuLabel: '1人で走りながら待つ',
+    quit: toTitle,
+    colors: { main: '#e2553f', alt: '#3d6fd8', bg: '#fffaf0', fg: 'var(--ink)' },
+  });
+  QM.resultSlot('#vs-result .box', '#btn-vs-title');
   // 待っている間：相手のスコアと残り時間
   setInterval(() => {
     if (!vs || !$('vs-wait').classList.contains('show')) return;

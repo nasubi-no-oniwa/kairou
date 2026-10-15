@@ -13,7 +13,7 @@
   const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   class Room {
     constructor(db, code, name, cb) {
-      this.db = db; this.code = clean(code); this.name = (String(name || '').trim().slice(0, 8)) || 'ななし';
+      this.db = db; this.code = clean(code); this.name = (window.QM ? QM.ng(name) : String(name || '').trim().slice(0, 8)) || 'ななし';
       this.cb = cb || {}; this.id = uid(); this.slot = -1; this.players = {}; this.ready = {};
       this.game = null; this.round = 0; this.subs = []; this.rsubs = []; this.offset = 0; this.left = false;
       this.root = db.ref('kairou/' + this.code);
@@ -45,7 +45,7 @@
       await this.root.child('ready/' + s).set(this.joinRound);
       return { slot: s, code: this.code };
     }
-    people() { return { names: [0, 1].map(s => (this.players[s] ? this.players[s].name : null)), slot: this.slot }; }
+    people() { return { names: [0, 1].map(s => (this.players[s] ? (window.QM ? QM.ng(this.players[s].name) : this.players[s].name) : null)), slot: this.slot }; }
     tryStart() {
       if (this.slot !== 0 || this.left || !this.joinRound) return;
       const r = this.ready || {}, next = (this.game ? this.game.round : 0) + 1;
