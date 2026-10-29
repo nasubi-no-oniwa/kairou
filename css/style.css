@@ -87,3 +87,19 @@ body.vs.playing .opp-chip { display: block; }
 .vs-table th { font-size: 13px; padding: 4px; } .vs-table td { padding: 4px; text-align: center; } .vs-table td:first-child { text-align: left; }
 .vs-table tr.sc td { border-top: 3px dashed rgba(59,42,32,.35); font-family: var(--display); font-weight: 400; font-size: 22px; }
 .vs-table td.win { color: #e0457b; }
+
+/* ことばの切りかえ */
+.langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.langs button{font:800 13px 'M PLUS Rounded 1c',sans-serif;background:transparent;color:#3b2a20;border:2px solid rgba(59,42,32,.45);border-radius:999px;padding:4px 12px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:#3b2a20;color:#fff;border-color:#3b2a20}
+html[data-lang="ko"]{--display:"Black Han Sans","Dela Gothic One",sans-serif}
+/* ことばごとの組みなおし */
+html[data-lang="en"] .logo { font-size: clamp(30px, 10.5vw, 46px); line-height: 1; }
+html[data-lang="en"] .logo span { display: block; }
+html[data-lang="en"] .kana, html[data-lang="zh"] .kana, html[data-lang="ko"] .kana { letter-spacing: .25em; text-indent: .25em; }
+html[data-lang="en"] .area-name { font-size: clamp(20px, 6vw, 30px); }
+html[data-lang="zh"] .area-name, html[data-lang="ko"] .area-name { -webkit-text-stroke-width: 5px; }
+html:not([data-lang="ja"]) .mis { align-items: flex-start; }
+html:not([data-lang="ja"]) .mis b { min-width: 0; white-space: normal; overflow: visible; line-height: 1.2; padding: 1px 0; }
+.qm-fld { white-space: nowrap; } .qm-fld input { min-width: 0; }
+@media (max-width: 340px) { .langs button { padding: 3px 9px; font-size: 12px; } }

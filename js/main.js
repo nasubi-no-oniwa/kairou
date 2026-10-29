@@ -3,28 +3,29 @@
 // =============================================
 (function () {
   const $ = id => document.getElementById(id);
+  const T = I18N.t;
   const cv = $('view'), g = cv.getContext('2d');
   const C = MK.CONFIG, INK = '#3b2a20';
   const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   // 区間（500mごと）の色。c：[床, 左, 天井, 右]（最初の向き）  a：骨組みの色  fog：遠くの光の色
   const THEMES = [
-    { n: 'はじまりの回廊', c: ['#f5c26b', '#8fc1f2', '#f6eedb', '#9ed98f'], a: '#7c5cff', fog: '#fff4dc' },
-    { n: 'さくらの回廊', c: ['#ffb3c7', '#ffd6e2', '#fff1f4', '#f59ab8'], a: '#e0457b', fog: '#fff0f4' },
-    { n: 'うみの回廊', c: ['#7fd3e6', '#5fa8e8', '#c9f0f7', '#4cc4b8'], a: '#1f6fd1', fog: '#e6fbff' },
-    { n: 'ゆうやけの回廊', c: ['#ffb066', '#e98bb8', '#ffd99a', '#f2786b'], a: '#b8406b', fog: '#fff0d9' },
-    { n: 'もりの回廊', c: ['#a8d672', '#6fbf7a', '#dcefb4', '#8ccf5e'], a: '#3d8b3d', fog: '#f2fbe3' },
-    { n: 'こおりの回廊', c: ['#d9f1ff', '#addcf7', '#ffffff', '#95d0f0'], a: '#3aa0d8', fog: '#f4fbff' },
-    { n: 'よるの回廊', c: ['#5b5bb0', '#4a73c2', '#3a3a7a', '#7158c4'], a: '#f5b800', fog: '#2a2550' },
-    { n: 'おかしの回廊', c: ['#ffc4e6', '#bff0cf', '#fff0b0', '#d4c8ff'], a: '#ff6fa5', fog: '#fff7fb' }
-  ].map(t => ({ ...t, c: t.c.map(hx), a: hx(t.a), fog: hx(t.fog) }));
+    { k: 'th0', c: ['#f5c26b', '#8fc1f2', '#f6eedb', '#9ed98f'], a: '#7c5cff', fog: '#fff4dc' },
+    { k: 'th1', c: ['#ffb3c7', '#ffd6e2', '#fff1f4', '#f59ab8'], a: '#e0457b', fog: '#fff0f4' },
+    { k: 'th2', c: ['#7fd3e6', '#5fa8e8', '#c9f0f7', '#4cc4b8'], a: '#1f6fd1', fog: '#e6fbff' },
+    { k: 'th3', c: ['#ffb066', '#e98bb8', '#ffd99a', '#f2786b'], a: '#b8406b', fog: '#fff0d9' },
+    { k: 'th4', c: ['#a8d672', '#6fbf7a', '#dcefb4', '#8ccf5e'], a: '#3d8b3d', fog: '#f2fbe3' },
+    { k: 'th5', c: ['#d9f1ff', '#addcf7', '#ffffff', '#95d0f0'], a: '#3aa0d8', fog: '#f4fbff' },
+    { k: 'th6', c: ['#5b5bb0', '#4a73c2', '#3a3a7a', '#7158c4'], a: '#f5b800', fog: '#2a2550' },
+    { k: 'th7', c: ['#ffc4e6', '#bff0cf', '#fff0b0', '#d4c8ff'], a: '#ff6fa5', fog: '#fff7fb' }
+  ].map(t => ({ ...t, get n() { return T(t.k); }, c: t.c.map(hx), a: hx(t.a), fog: hx(t.fog) }));
   // ミッション（1回ごとに3つ。達成で +30m）
   const MIS_BONUS = 30;
   const MISSIONS = [
-    { t: 'コインを15枚', get: r => r.coins, n: 15 }, { t: 'コインを30枚', get: r => r.coins, n: 30 },
-    { t: '20回まわす', get: r => r.stat.rot, n: 20 }, { t: '50回まわす', get: r => r.stat.rot, n: 50 },
-    { t: 'ジャンプ30回', get: r => r.stat.jump, n: 30 }, { t: 'ジャンプ台で5回とぶ', get: r => r.stat.pad, n: 5 },
-    { t: '動くかべを10回ぬける', get: r => r.stat.mover, n: 10 }, { t: '300m走る', get: r => r.dist(), n: 300 },
-    { t: '1区間をこえる', get: r => r.dist(), n: 500 }, { t: 'まわさずに150m', get: r => Math.floor(r.stat.noRotBest), n: 150 }
+    { t: 'm_c15', get: r => r.coins, n: 15 }, { t: 'm_c30', get: r => r.coins, n: 30 },
+    { t: 'm_r20', get: r => r.stat.rot, n: 20 }, { t: 'm_r50', get: r => r.stat.rot, n: 50 },
+    { t: 'm_j30', get: r => r.stat.jump, n: 30 }, { t: 'm_p5', get: r => r.stat.pad, n: 5 },
+    { t: 'm_mv10', get: r => r.stat.mover, n: 10 }, { t: 'm_d300', get: r => r.dist(), n: 300 },
+    { t: 'm_a1', get: r => r.dist(), n: 500 }, { t: 'm_nr150', get: r => Math.floor(r.stat.noRotBest), n: 150 }
   ];
   let run = null, W = 0, H = 0, dpr = 1, cx = 0, cy = 0, S = 0, ang = 0, shake = 0, dead = false, acc = 0;
   let missions = [], ghost = null, rec = null, mode = 'run', vs = null, room = null;
@@ -88,16 +89,16 @@
     drawMissions();
     ['title', 'over', 'vs-result', 'vs-wait', 'ov-online'].forEach(id => $(id).classList.remove('show'));
     document.body.classList.add('playing'); hintT = 0; document.querySelectorAll('.hint-zone').forEach(e => e.classList.remove('gone'));
-    $('best').textContent = mode === 'ghost' ? 'VSゴースト ' + best + 'm' : best ? 'ベスト ' + best + 'm' : ''; $('coins').textContent = 0;
+    $('best').textContent = mode === 'ghost' ? T('vs_best', { n: best }) : best ? T('best_n', { n: best }) : ''; $('coins').textContent = 0;
     beep(660, 0.1); beep(990, 0.14, 'triangle', 0.06, 0.1);
     MK.Music.start(actx, 0);
   }
   function drawMissions() {
-    $('missions').innerHTML = missions.map(m => { const v = run ? Math.min(m.n, m.get(run)) : 0; return `<div class="mis${m.done ? ' done' : ''}"><b>${m.done ? '✓' : ''}${m.t}</b><span>${m.done ? '+' + MIS_BONUS + 'm' : v + '/' + m.n}</span></div>`; }).join('');
+    $('missions').innerHTML = missions.map(m => { const v = run ? Math.min(m.n, m.get(run)) : 0; return `<div class="mis${m.done ? ' done' : ''}"><b>${m.done ? '✓' : ''}${T(m.t)}</b><span>${m.done ? '+' + MIS_BONUS + 'm' : v + '/' + m.n}</span></div>`; }).join('');
   }
   function checkMissions() {
     let ch = false;
-    for (const m of missions) if (!m.done && m.get(run) >= m.n) { m.done = true; ch = true; snd.mis(); pop('ミッション達成！ +' + MIS_BONUS + 'm'); }
+    for (const m of missions) if (!m.done && m.get(run) >= m.n) { m.done = true; ch = true; snd.mis(); pop(T('mis_done', { n: MIS_BONUS })); }
     if (ch || run.ticks % 15 === 0) drawMissions();
   }
   // ---------- 精算 ----------
@@ -108,20 +109,20 @@
     const nb = total > best;
     if (nb) { best = total; bestDist = d; store.set('best', best); store.set('bestDist', d); store.set('ghost', { seed: run.seed, s: rec }); }
     lastDeath = d; store.set('last', d);
-    $('over-title').textContent = run.state === 'fall' ? 'ドボン！' : 'ゴツン！';
+    $('over-title').textContent = T(run.state === 'fall' ? 'fell' : 'bonk');
     $('b-dist').textContent = d + 'm'; $('b-coins').textContent = coins; $('b-coin-m').textContent = '+' + coins + 'm';
     $('b-mis').textContent = md; $('b-mis-m').textContent = '+' + md * MIS_BONUS + 'm'; $('b-total').textContent = 0;
     document.querySelectorAll('.bill .line').forEach(l => l.classList.remove('on'));
     $('over-best').textContent = ''; $('over-best').className = '';
-    $('mis-result').innerHTML = missions.map(m => `<li class="${m.done ? 'done' : ''}">${m.done ? '★' : '☆'} ${m.t}</li>`).join('');
-    const a = Math.floor(d / C.AREA); $('over-area').textContent = 'たどりついた区間：' + THEMES[a % THEMES.length].n + (a >= THEMES.length ? '（' + (Math.floor(a / THEMES.length) + 1) + '周目）' : '');
+    $('mis-result').innerHTML = missions.map(m => `<li class="${m.done ? 'done' : ''}">${m.done ? '★' : '☆'} ${T(m.t)}</li>`).join('');
+    const a = Math.floor(d / C.AREA); $('over-area').textContent = T('area_reached', { a: THEMES[a % THEMES.length].n }) + (a >= THEMES.length ? T('lap', { n: Math.floor(a / THEMES.length) + 1 }) : '');
     $('btn-ghost2').hidden = !store.get('ghost', null);
     $('over').classList.add('show'); document.body.classList.remove('playing');
     // 数字が順に入っていく
     const lines = document.querySelectorAll('.bill .line'), steps = [d, d + coins, total];
     let k = 0;
     const next = () => {
-      if (k >= 3) { $('b-total').textContent = total; snd.total(); $('over-best').textContent = nb ? (mode === 'ghost' ? 'ゴーストに勝った！ 自己ベスト更新！' : '自己ベスト更新！') : 'ベスト ' + best + 'm'; $('over-best').className = nb ? 'new' : ''; return; }
+      if (k >= 3) { $('b-total').textContent = total; snd.total(); $('over-best').textContent = nb ? (mode === 'ghost' ? T('ghost_beat') : T('new_best')) : T('best_n', { n: best }); $('over-best').className = nb ? 'new' : ''; return; }
       lines[k].classList.add('on'); const from = k ? steps[k - 1] : 0, to = steps[k], t0 = performance.now();
       const tick = () => { const q = Math.min(1, (performance.now() - t0) / 450); $('b-total').textContent = Math.round(from + (to - from) * q); if (q < 1) requestAnimationFrame(tick); else { snd.tick(); k++; setTimeout(next, 160); } };
       if (to === from) { k++; setTimeout(next, 120); } else tick();
@@ -132,14 +133,15 @@
   $('btn-ghost').onclick = () => start(true); $('btn-ghost2').onclick = () => start(true);
   $('btn-title').onclick = () => toTitle();
   function toTitle() { leaveRoom(); ['over', 'vs-result', 'vs-wait', 'ov-online'].forEach(id => $(id).classList.remove('show')); $('title').classList.add('show'); run = null; mode = 'run'; showTitle(); document.body.classList.remove('playing', 'vs'); }
-  function showTitle() { $('best-title').textContent = best ? 'ベスト ' + best + 'm' : ''; $('btn-ghost').hidden = !store.get('ghost', null); }
+  function showTitle() { $('best-title').textContent = best ? T('best_n', { n: best }) : ''; $('btn-ghost').hidden = !store.get('ghost', null); }
   showTitle();
+  document.addEventListener('langchange', () => { showTitle(); if (run) drawMissions(); if (vs) updOpp(); });
 
   // ---------- あいことば対戦 ----------
-  function loadScript(src) { return new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error('通信できませんでした。電波のよいところでもう一度ためしてください')); document.head.appendChild(el); }); }
+  function loadScript(src) { return new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error(T('err_net'))); document.head.appendChild(el); }); }
   async function getDb() {
     if (MK._db) return MK._db;
-    if (!MK.FIREBASE_CONFIG) throw new Error('オンライン対戦はまだ準備中です');
+    if (!MK.FIREBASE_CONFIG) throw new Error(T('err_notready'));
     const v = '10.12.2';
     await loadScript('https://www.gstatic.com/firebasejs/' + v + '/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/' + v + '/firebase-database-compat.js');
@@ -158,51 +160,51 @@
   $('btn-online-close').onclick = () => { leaveRoom(); $('ov-online').classList.remove('show'); $('title').classList.add('show'); };
   $('btn-copy').onclick = async () => {
     const url = location.origin + location.pathname + '?room=' + encodeURIComponent(room ? room.code : '');
-    try { await navigator.clipboard.writeText(url); $('btn-copy').textContent = 'コピーしました！'; } catch (e) { prompt('このリンクを送ってください', url); }
-    setTimeout(() => { $('btn-copy').textContent = 'さそうリンクをコピー'; }, 2000);
+    try { await navigator.clipboard.writeText(url); $('btn-copy').textContent = T('copied'); } catch (e) { prompt(T('send_link'), url); }
+    setTimeout(() => { $('btn-copy').textContent = T('copy_link'); }, 2000);
   };
   $('btn-join').onclick = joinOnline;
   $('in-code').addEventListener('keydown', e => { if (e.key === 'Enter') joinOnline(); });
   async function joinOnline() {
     ac();
-    const code = MK.cleanCode($('in-code').value), name = $('in-name').value.trim().slice(0, 8) || 'ななし';
-    if (!code) { $('online-err').textContent = 'あいことばを入れてください（. # $ / [ ] は使えません）'; return; }
+    const code = MK.cleanCode($('in-code').value), name = $('in-name').value.trim().slice(0, 8) || T('noname');
+    if (!code) { $('online-err').textContent = T('err_code'); return; }
     try { localStorage.setItem('kk_name', name); } catch (e) {}
-    $('online-err').textContent = ''; $('btn-join').disabled = true; $('btn-join').textContent = 'つないでいます…';
+    $('online-err').textContent = ''; $('btn-join').disabled = true; $('btn-join').textContent = T('connecting');
     try {
       const db = await getDb();
       leaveRoom();
       const r = new MK.Room(db, code, name, {
-        onPeople: p => { if (room === r && r.slot >= 0 && !p.names[1 - r.slot] && !vs) $('wait-msg').textContent = 'あいてを待っています…'; if (room === r && vs) vs.names = p.names.map((n, i) => n || vs.names[i]); },
+        onPeople: p => { if (room === r && r.slot >= 0 && !p.names[1 - r.slot] && !vs) $('wait-msg').textContent = T('waiting'); if (room === r && vs) vs.names = p.names.map((n, i) => n || vs.names[i]); },
         onStart: g => { if (room === r) startVs(g); },
         onOpp: st => { if (room === r && vs) { vs.oppSt = st; vs.oppAt = performance.now(); } },
         onEnd: ends => { if (room === r && vs) onEnds(ends); },
-        onOppLeft: () => { if (room === r && vs) { vs.oppLeft = true; if (!vs.oppEnd) oppGone(); else { $('btn-rematch').hidden = true; $('r-note').textContent = '相手が退室しました'; } } }
+        onOppLeft: () => { if (room === r && vs) { vs.oppLeft = true; if (!vs.oppEnd) oppGone(); else { $('btn-rematch').hidden = true; $('r-note').textContent = T('left'); } } }
       });
       room = r;
       await r.join();
-      $('wait-code').textContent = r.code; $('wait-msg').textContent = 'あいてを待っています…'; lobby(true);
-    } catch (e) { $('online-err').textContent = e.message || 'つながりませんでした'; leaveRoom(); }
-    $('btn-join').disabled = false; $('btn-join').textContent = 'はいる';
+      $('wait-code').textContent = r.code; $('wait-msg').textContent = T('waiting'); lobby(true);
+    } catch (e) { $('online-err').textContent = e.message || T('err_conn'); leaveRoom(); }
+    $('btn-join').disabled = false; $('btn-join').textContent = T('join');
   }
   function startVs(gm) {
     const r = room; leaveRoomKeep();
     QM.started({ code: r && r.code, watch: gm.slot < 0 });
     run = new MK.Run(gm.seed); mode = 'vs'; ghost = null; rec = null;
-    vs = { slot: gm.slot, round: gm.round, names: gm.names.map(n => n || '？'), startAt: performance.now() + gm.wait, oppSt: null, oppAt: 0, oppEnd: null, myEnd: null, bonusUntil: 0, ox: 0, oh: 0, lastCount: -1, go: false };
+    vs = { slot: gm.slot, round: gm.round, names: gm.names.map(n => n || '?'), startAt: performance.now() + gm.wait, oppSt: null, oppAt: 0, oppEnd: null, myEnd: null, bonusUntil: 0, ox: 0, oh: 0, lastCount: -1, go: false };
     ang = 0; dead = false; shake = 0; coinPitch = 0; parts = []; acc = 0; missions = []; drawMissions();
     runBest = -1; runLast = -1;
     ['title', 'over', 'vs-result', 'vs-wait', 'ov-online'].forEach(id => $(id).classList.remove('show'));
     document.body.classList.add('playing', 'vs'); hintT = 0; document.querySelectorAll('.hint-zone').forEach(e => e.classList.remove('gone'));
-    $('best').textContent = 'スコア＝距離＋コイン'; $('coins').textContent = 0; $('bonus').classList.remove('show');
+    $('best').textContent = T('score_rule'); $('coins').textContent = 0; $('bonus').classList.remove('show');
     $('btn-rematch').hidden = false; $('btn-rematch').disabled = false; $('r-note').textContent = '';
     updOpp();
   }
   function leaveRoomKeep() { $('bonus').classList.remove('show'); clearTimeout(hideTm); }
   function updOpp() {
     if (!vs) return;
-    const el = $('opp'), nm = vs.names[1 - vs.slot] || 'あいて', e = vs.oppEnd, sc = e ? e.sc : vs.oppSt ? vs.oppSt.sc : 0;
-    el.innerHTML = nm + (e ? (e.how === 'left' ? '（退室）' : e.how === 'done' ? '（ゴール）' : '（おわり）') : '') + '<b>' + sc + 'm</b>'; el.classList.toggle('out', !!e);
+    const el = $('opp'), nm = vs.names[1 - vs.slot] || T('opp'), e = vs.oppEnd, sc = e ? e.sc : vs.oppSt ? vs.oppSt.sc : 0;
+    el.innerHTML = nm + (e ? T(e.how === 'left' ? 'st_left' : e.how === 'done' ? 'st_goal' : 'st_over') : '') + '<b>' + sc + 'm</b>'; el.classList.toggle('out', !!e);
   }
   // 相手の記録がとどいた
   function onEnds(ends) {
@@ -218,7 +220,7 @@
     if (run && run.state === 'run' && !vs.bonusUntil) {
       // 自分だけ残った：30秒のボーナスタイム（コインがたくさん）
       vs.bonusUntil = run.ticks + BONUS_SEC * 60; addBonusCoins();
-      pop(vs.oppEnd.how === 'left' ? '相手が退室！ ボーナスタイム' : '相手がやられた！ ボーナスタイム'); snd.area();
+      pop(T(vs.oppEnd.how === 'left' ? 'opp_left_bonus' : 'opp_down_bonus')); snd.area();
       $('bonus').classList.add('show');
     } else if (vs.myEnd) showVsResult();
   }
@@ -235,8 +237,8 @@
     if (vs.oppEnd) showVsResult(); else showWait();
   }
   function showWait() {
-    $('w-title').textContent = run.state === 'fall' ? 'ドボン！' : 'ゴツン！';
-    $('w-me-n').textContent = vs.names[vs.slot] + '（あなた）'; $('w-op-n').textContent = vs.names[1 - vs.slot];
+    $('w-title').textContent = T(run.state === 'fall' ? 'fell' : 'bonk');
+    $('w-me-n').textContent = vs.names[vs.slot] + T('you_sfx'); $('w-op-n').textContent = vs.names[1 - vs.slot];
     $('w-me').textContent = vs.myEnd.sc; $('vs-wait').classList.add('show');
   }
   function showVsResult() {
@@ -244,16 +246,16 @@
     const me = vs.myEnd, op = vs.oppEnd, t = $('r-title');
     // ランダム対戦で相手が抜けたら、残った人の勝ち
     const res = vs.oppLeft && QM.isRandom() ? 'win' : me.sc > op.sc ? 'win' : me.sc < op.sc ? 'lose' : 'draw';
-    t.textContent = res === 'win' ? 'かち！' : res === 'lose' ? 'まけ…' : 'ひきわけ'; t.className = res;
-    $('r-me-n').textContent = vs.names[vs.slot] + '（あなた）'; $('r-op-n').textContent = vs.names[1 - vs.slot];
+    t.textContent = T(res === 'win' ? 'res_win' : res === 'lose' ? 'res_lose' : 'res_draw'); t.className = res;
+    $('r-me-n').textContent = vs.names[vs.slot] + T('you_sfx'); $('r-op-n').textContent = vs.names[1 - vs.slot];
     $('r-me-d').textContent = me.d + 'm'; $('r-op-d').textContent = op.d + 'm'; $('r-me-c').textContent = '×' + me.c; $('r-op-c').textContent = '×' + op.c;
     $('r-me-s').textContent = me.sc + 'm'; $('r-op-s').textContent = op.sc + 'm';
     $('r-me-s').className = res === 'win' ? 'win' : ''; $('r-op-s').className = res === 'lose' ? 'win' : '';
-    $('r-note').textContent = vs.oppLeft ? (QM.isRandom() ? '相手が抜けたので、あなたの勝ち！' : '相手が退室しました') : '';
+    $('r-note').textContent = vs.oppLeft ? (QM.isRandom() ? T('left_win') : T('left')) : '';
     $('btn-rematch').hidden = !!vs.oppLeft; $('btn-rematch').disabled = false;
     $('vs-result').classList.add('show'); res === 'lose' ? beep(330, 0.4, 'triangle', 0.07, 0, 200) : snd.total();
   }
-  $('btn-rematch').onclick = () => { if (!room) return; room.rematch(); $('btn-rematch').disabled = true; $('r-note').textContent = 'あいての「もう一回」を待っています…'; };
+  $('btn-rematch').onclick = () => { if (!room) return; room.rematch(); $('btn-rematch').disabled = true; $('r-note').textContent = T('wait_rematch'); };
   $('btn-vs-title').onclick = () => toTitle();
 
   // ---------- だれかと対戦（ランダム対戦） ----------
@@ -261,7 +263,7 @@
     game: 'kairou', ver: 'v1', name: '回廊快走',
     getDb, anchor: '#btn-vs', anchorWhere: 'before', btnClass: 'btn vs', nextClass: 'btn primary', nameKey: 'kk_name',
     join: (code, name) => { ac(); $('in-code').value = code; $('in-name').value = name; joinOnline(); },
-    cpu: () => $('btn-start').click(), cpuLabel: '1人で走りながら待つ',
+    cpu: () => $('btn-start').click(), cpuLabel: () => T('solo_wait'),
     quit: toTitle,
     colors: { main: '#e2553f', alt: '#3d6fd8', bg: '#fffaf0', fg: 'var(--ink)' },
   });
@@ -270,7 +272,7 @@
   setInterval(() => {
     if (!vs || !$('vs-wait').classList.contains('show')) return;
     $('w-op').textContent = vs.oppSt ? vs.oppSt.sc : 0;
-    $('w-left').textContent = 'のこり ' + Math.max(0, Math.ceil(BONUS_SEC - (performance.now() - vs.myEndAt) / 1000)) + '秒くらい';
+    $('w-left').textContent = T('left_n', { n: Math.max(0, Math.ceil(BONUS_SEC - (performance.now() - vs.myEndAt) / 1000)) });
     if (vs.oppAt && performance.now() - vs.oppAt > 8000 + BONUS_SEC * 1000 && !vs.oppEnd) oppGone();
   }, 200);
   // 対戦中に別の画面へ行ったまま5秒たったら、その人の負け（おわり）
@@ -420,8 +422,8 @@
         const zr = i - pos + ZP;
         if (zr > NEAR) {
           if (i % C.AREA === 0) ring(i, zr, '#ffffff', THEMES[(i / C.AREA) % THEMES.length].n);
-          if (i === runBest && mode !== 'ghost') ring(i, zr, '#f5b800', 'ベスト ' + i + 'm');
-          else if (i === runLast && mode !== 'ghost') ring(i, zr, '#ff7aa8', '前回 ' + i + 'm', true);
+          if (i === runBest && mode !== 'ghost') ring(i, zr, '#f5b800', T('best_n', { n: i }));
+          else if (i === runLast && mode !== 'ghost') ring(i, zr, '#ff7aa8', T('last_n', { n: i }), true);
         }
       }
       const zz0 = Math.max(NEAR, i - pos + ZP + 0.1), zz1 = i - pos + ZP + 0.9;
@@ -462,7 +464,7 @@
     const p = facePt(gv, gx, C.PR + gh), q = proj(p, ZP), r = C.PR * S / ZP, rot = (gv * Math.PI / 2) - ang;
     g.save(); g.globalAlpha = 0.45; drawBlob(g, q[0], q[1], r, '#ffffff', 1, 1, rot); g.restore();
     const fs = Math.max(11, r * 0.45); g.font = `900 ${fs}px "M PLUS Rounded 1c", sans-serif`; g.textAlign = 'center'; g.lineWidth = fs * 0.28; g.strokeStyle = INK; g.fillStyle = '#fff';
-    g.strokeText('ベスト', q[0], q[1] - r * 1.3); g.fillText('ベスト', q[0], q[1] - r * 1.3);
+    g.strokeText(T('best'), q[0], q[1] - r * 1.3); g.fillText(T('best'), q[0], q[1] - r * 1.3);
   }
   // 対戦相手：同じコース・同じ速さなので、自分と同じ深さにいる
   function drawOpp() {
@@ -470,7 +472,7 @@
     const o = vs.oppSt; vs.ox += (o.x - vs.ox) * 0.25; vs.oh += (o.h - vs.oh) * 0.35;
     const p = facePt(o.v, vs.ox, C.PR + Math.max(0, vs.oh)), q = proj(p, ZP), r = C.PR * S / ZP, rot = (o.v * Math.PI / 2) - ang;
     g.save(); g.globalAlpha = 0.55; drawBlob(g, q[0], q[1], r, '#ff9a4d', 1, 1, rot); g.restore();
-    const fs = Math.max(11, r * 0.45), nm = vs.names[1 - vs.slot] || 'あいて'; g.font = `900 ${fs}px "M PLUS Rounded 1c", sans-serif`; g.textAlign = 'center'; g.lineWidth = fs * 0.28; g.strokeStyle = INK; g.fillStyle = '#ffd0a8';
+    const fs = Math.max(11, r * 0.45), nm = vs.names[1 - vs.slot] || T('opp'); g.font = `900 ${fs}px "M PLUS Rounded 1c", sans-serif`; g.textAlign = 'center'; g.lineWidth = fs * 0.28; g.strokeStyle = INK; g.fillStyle = '#ffd0a8';
     g.strokeText(nm, q[0], q[1] - r * 1.3); g.fillText(nm, q[0], q[1] - r * 1.3);
   }
   function drawPlayer() {
@@ -502,17 +504,17 @@
           if (vs.bonusUntil && run.ticks >= vs.bonusUntil) run.finish();
         }
       }
-      if (vs && vs.bonusUntil && run.state === 'run') $('bonus').textContent = 'ボーナスタイム のこり ' + Math.max(0, Math.ceil((vs.bonusUntil - run.ticks) / 60)) + '秒';
+      if (vs && vs.bonusUntil && run.state === 'run') $('bonus').textContent = T('bonus_left', { n: Math.max(0, Math.ceil((vs.bonusUntil - run.ticks) / 60)) });
       // 相手から長く連絡がない（電波が切れた）
       if (vs && run.state === 'run' && !waiting && !vs.oppEnd && vs.oppAt && now - vs.oppAt > 8000) oppGone();
       coinT -= dt; if (coinT <= 0) coinPitch = 0;
       const k = S / ZP;
       for (const e of run.events) {
         if (e === 'jump') snd.jump(); else if (e === 'pad') { snd.pad(); puff(cx + run.x * k, cy + k - 4, 8, '#ffd34d'); } else if (e === 'land') { snd.land(); puff(cx + run.x * k, cy + k - 4, 6, 'rgba(255,255,255,.85)'); } else if (e === 'rotR' || e === 'rotL') snd.rot();
-        else if (e === 'done') { snd.total(); pop('フィニッシュ！'); $('bonus').classList.remove('show'); }
+        else if (e === 'done') { snd.total(); pop(T('finish')); $('bonus').classList.remove('show'); }
         else if (e === 'crash') { snd.crash(); shake = 1; MK.Music.stop(); } else if (e === 'fall') { snd.fall(); MK.Music.stop(); }
         else if (e === 'coin') { puff(cx + run.x * k, cy + k - C.PR * k * 2 - run.h * k, 7, '#ffd34d', true); snd.coin(); coinPitch++; coinT = 0.6; $('coins').textContent = run.coins; }
-        else if (e.startsWith('stage:')) { const el = $('stage-name'); el.textContent = e.slice(6); el.classList.add('show'); clearTimeout(stageTm); stageTm = setTimeout(() => el.classList.remove('show'), 1500); snd.stage(); }
+        else if (e.startsWith('stage:')) { const el = $('stage-name'); const sn = e.slice(6), sk = (window.I18N_STAGE || {})[sn]; el.textContent = sk ? T(sk) : sn; el.classList.add('show'); clearTimeout(stageTm); stageTm = setTimeout(() => el.classList.remove('show'), 1500); snd.stage(); }
         else if (e.startsWith('area:')) { const a = +e.slice(5), el = $('area-name'); el.innerHTML = '<small>' + a * C.AREA + 'm</small>\n' + THEMES[a % THEMES.length].n; el.classList.add('show'); clearTimeout(areaTm); areaTm = setTimeout(() => el.classList.remove('show'), 2200); snd.area(); MK.Music.area(a); }
       }
       run.events = [];

@@ -39,90 +39,92 @@
 <div id="opp" class="opp-chip"></div>
 <div id="bonus" class="bonus-chip"></div>
 <div id="count" class="count"></div>
-<div id="jump-btn">ジャンプ</div>
-<div id="hint-l" class="hint-zone">← すべらせて横移動 →</div>
-<div id="hint-r" class="hint-zone">⇆ スワイプで回転</div>
+<div id="jump-btn" data-i="jump">ジャンプ</div>
+<div id="hint-l" class="hint-zone" data-i="hint_l">← すべらせて横移動 →</div>
+<div id="hint-r" class="hint-zone" data-i="hint_r">⇆ スワイプで回転</div>
 
 <section id="title" class="screen show">
   <div class="box">
-    <p class="kana">かいろうかいそう</p>
-    <h1 class="logo">回廊<span>快走</span></h1>
-    <p class="tag">通路をまわして、どこまでも走れ。</p>
+    <p class="kana" data-i="kana">かいろうかいそう</p>
+    <h1 class="logo" data-ih="logo">回廊<span>快走</span></h1>
+    <p class="tag" data-i="tag">通路をまわして、どこまでも走れ。</p>
     <canvas id="title-blob" width="160" height="150"></canvas>
-    <button class="btn primary" id="btn-start">無限回廊を走る</button>
-    <button class="btn ghost" id="btn-ghost" hidden>ベストのコースで、ゴーストと走る</button>
-    <button class="btn vs" id="btn-vs">あいことばで対戦</button>
+    <button class="btn primary" id="btn-start" data-i="start">無限回廊を走る</button>
+    <button class="btn ghost" id="btn-ghost" hidden data-i="ghost_btn">ベストのコースで、ゴーストと走る</button>
+    <button class="btn vs" id="btn-vs" data-i="online">あいことばで対戦</button>
     <p class="best-line" id="best-title"></p>
     <div class="howto">
-      <div><h3>スマホ</h3><p>画面の<b>左半分</b>：指を左右にすべらせて横に動く<br>画面の<b>右半分</b>：左右にスワイプで通路が90度まわる<br>右下の<b>ジャンプ</b>ボタンでジャンプ</p></div>
-      <div><h3>PC</h3><p>← → で横に動く　スペースでジャンプ<br>Q・E（または A・D）で通路をまわす</p></div>
-      <div><h3>あいことばで対戦</h3><p>2人が同じコースを同時に走る。先にやられたら、相手に<b>30秒のボーナスタイム</b>（コインがたくさん）。最後のスコア（距離＋コイン）が多い方の勝ち。</p></div>
-      <p class="note">床に穴があったら、まわして壁を床にしよう。赤い低い箱はジャンプでこえられる。紫と緑の高いかべはよけるしかない。ひびの入った床は近づくとくずれる。黄色の矢印はジャンプ台。<br>コインは1枚1mとして、最後に記録に足されます。</p>
+      <div><h3 data-i="phone">スマホ</h3><p data-ih="phone_d">画面の<b>左半分</b>：指を左右にすべらせて横に動く<br>画面の<b>右半分</b>：左右にスワイプで通路が90度まわる<br>右下の<b>ジャンプ</b>ボタンでジャンプ</p></div>
+      <div><h3>PC</h3><p data-ih="pc_d">← → で横に動く　スペースでジャンプ<br>Q・E（または A・D）で通路をまわす</p></div>
+      <div><h3 data-i="online">あいことばで対戦</h3><p data-ih="vs_d">2人が同じコースを同時に走る。先にやられたら、相手に<b>30秒のボーナスタイム</b>（コインがたくさん）。最後のスコア（距離＋コイン）が多い方の勝ち。</p></div>
+      <p class="note" data-ih="note">床に穴があったら、まわして壁を床にしよう。赤い低い箱はジャンプでこえられる。紫と緑の高いかべはよけるしかない。ひびの入った床は近づくとくずれる。黄色の矢印はジャンプ台。<br>コインは1枚1mとして、最後に記録に足されます。</p>
     </div>
-    <a class="home-link" href="https://nasubi-no-oniwa.github.io/">🍆 なすびのお庭へ</a>
+    <a class="home-link" href="https://nasubi-no-oniwa.github.io/" data-i="home_e">🍆 なすびのお庭へ</a>
+    <div class="langs" role="group" aria-label="Language"><button type="button" data-lang="ja">日本語</button><button type="button" data-lang="en">English</button><button type="button" data-lang="zh">繁中</button><button type="button" data-lang="ko">한국어</button></div>
   </div>
 </section>
 <section id="over" class="screen">
   <div class="box">
-    <h2 id="over-title">ドボン！</h2>
+    <h2 id="over-title" data-i="fell">ドボン！</h2>
     <div class="bill">
-      <div class="line"><span>走った距離</span><b id="b-dist">0m</b></div>
-      <div class="line"><span>コイン <i class="ci"></i>×<em id="b-coins">0</em></span><b id="b-coin-m">+0m</b></div>
-      <div class="line"><span>ミッション <em id="b-mis">0</em>こ</span><b id="b-mis-m">+0m</b></div>
-      <div class="total"><span>きろく</span><b><em id="b-total">0</em>m</b></div>
+      <div class="line"><span data-i="b_dist">走った距離</span><b id="b-dist">0m</b></div>
+      <div class="line"><span><span data-i="b_coin">コイン</span> <i class="ci"></i>×<em id="b-coins">0</em></span><b id="b-coin-m">+0m</b></div>
+      <div class="line"><span><span data-i="b_mis">ミッション</span> <em id="b-mis">0</em><span data-i="b_mis_u">こ</span></span><b id="b-mis-m">+0m</b></div>
+      <div class="total"><span data-i="record">きろく</span><b><em id="b-total">0</em>m</b></div>
     </div>
     <p id="over-best"></p>
     <ul class="mis-result" id="mis-result"></ul>
     <p id="over-area"></p>
-    <button class="btn primary" id="btn-retry">もう一回</button>
-    <button class="btn ghost" id="btn-ghost2" hidden>ベストのコースで、ゴーストと走る</button>
-    <button class="btn sub" id="btn-title">タイトルへ</button>
+    <button class="btn primary" id="btn-retry" data-i="again">もう一回</button>
+    <button class="btn ghost" id="btn-ghost2" hidden data-i="ghost_btn">ベストのコースで、ゴーストと走る</button>
+    <button class="btn sub" id="btn-title" data-i="to_title">タイトルへ</button>
   </div>
 </section>
 <section id="ov-online" class="screen">
   <div class="box">
-    <h2 class="sub-title">あいことばで対戦</h2>
+    <h2 class="sub-title" data-i="online">あいことばで対戦</h2>
     <div id="online-form" class="col">
-      <label class="field-l">あいことば<input id="in-code" maxlength="20" autocomplete="off" placeholder="例：かいろう123"></label>
-      <label class="field-l">なまえ<input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし"></label>
-      <p class="hint">同じあいことばを入れた人と対戦します（2人まで）。</p>
-      <button class="btn primary" id="btn-join">はいる</button>
+      <label class="field-l"><span data-i="passcode">あいことば</span><input id="in-code" maxlength="20" autocomplete="off" placeholder="例：かいろう123" data-ip="ex_code"></label>
+      <label class="field-l"><span data-i="name">なまえ</span><input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし" data-ip="noname"></label>
+      <p class="hint" data-i="online_hint2">同じあいことばを入れた人と対戦します（2人まで）。</p>
+      <button class="btn primary" id="btn-join" data-i="join">はいる</button>
     </div>
     <div id="online-wait" class="col" hidden>
-      <p class="wait-code">あいことば「<b id="wait-code"></b>」</p>
-      <p class="wait-msg" id="wait-msg">あいてを待っています…</p>
-      <button class="btn sub" id="btn-copy">さそうリンクをコピー</button>
+      <p class="wait-code"><span data-i="wait_pre">あいことば「</span><b id="wait-code"></b><span data-i="wait_post">」</span></p>
+      <p class="wait-msg" id="wait-msg" data-i="waiting">あいてを待っています…</p>
+      <button class="btn sub" id="btn-copy" data-i="copy_link">さそうリンクをコピー</button>
     </div>
     <p class="err" id="online-err"></p>
-    <button class="btn sub" id="btn-online-close">もどる</button>
+    <button class="btn sub" id="btn-online-close" data-i="back">もどる</button>
   </div>
 </section>
 <section id="vs-wait" class="screen">
   <div class="box">
     <h2 class="sub-title" id="w-title">ドボン！</h2>
-    <p class="hint">相手のボーナスタイムが終わるまで待っています</p>
+    <p class="hint" data-i="wait_bonus">相手のボーナスタイムが終わるまで待っています</p>
     <div class="race">
-      <div class="who me"><span id="w-me-n">あなた</span><b id="w-me">0</b><small>m</small></div>
+      <div class="who me"><span id="w-me-n" data-i="you">あなた</span><b id="w-me">0</b><small>m</small></div>
       <div class="vsmark">VS</div>
-      <div class="who op"><span id="w-op-n">あいて</span><b id="w-op">0</b><small>m</small></div>
+      <div class="who op"><span id="w-op-n" data-i="opp">あいて</span><b id="w-op">0</b><small>m</small></div>
     </div>
-    <p class="wait-left" id="w-left">のこり 30秒</p>
+    <p class="wait-left" id="w-left" data-i="left_30">のこり 30秒</p>
   </div>
 </section>
 <section id="vs-result" class="screen">
   <div class="box">
-    <h2 id="r-title">かち！</h2>
+    <h2 id="r-title" data-i="res_win">かち！</h2>
     <table class="vs-table">
-      <tr><th></th><th id="r-me-n">あなた</th><th id="r-op-n">あいて</th></tr>
-      <tr><td>走った距離</td><td id="r-me-d">0m</td><td id="r-op-d">0m</td></tr>
-      <tr><td>コイン</td><td id="r-me-c">0</td><td id="r-op-c">0</td></tr>
-      <tr class="sc"><td>スコア</td><td id="r-me-s">0m</td><td id="r-op-s">0m</td></tr>
+      <tr><th></th><th id="r-me-n" data-i="you">あなた</th><th id="r-op-n" data-i="opp">あいて</th></tr>
+      <tr><td data-i="b_dist">走った距離</td><td id="r-me-d">0m</td><td id="r-op-d">0m</td></tr>
+      <tr><td data-i="b_coin">コイン</td><td id="r-me-c">0</td><td id="r-op-c">0</td></tr>
+      <tr class="sc"><td data-i="score">スコア</td><td id="r-me-s">0m</td><td id="r-op-s">0m</td></tr>
     </table>
     <p class="hint" id="r-note"></p>
-    <button class="btn primary" id="btn-rematch">もう一回</button>
-    <button class="btn sub" id="btn-vs-title">タイトルへ</button>
+    <button class="btn primary" id="btn-rematch" data-i="again">もう一回</button>
+    <button class="btn sub" id="btn-vs-title" data-i="to_title">タイトルへ</button>
   </div>
 </section>
+<script src="js/i18n.js"></script>
 <script src="js/stages.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/music.js"></script>
