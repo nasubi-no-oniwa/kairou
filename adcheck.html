@@ -34,7 +34,7 @@ var was={};setInterval(function(){try{var any=false;for(var i=0;i<IDS.length;i++
 }catch(e){}})();</script>
 <meta name="robots" content="noindex">
 <!-- nasubi-ad: 結果画面の決めた場所のいちばん下に広告の帯を1つだけ出す（遊んでいる最中は出さない・ボタンに重ねない・広告の幅320pxを切らない） -->
-<script>(function(){try{var C=[{"a": "#over .box", "v": "#over"}],AD='https://nasubi-no-oniwa.github.io/ad/';
+<script>(function(){try{var C=[{"a": "#over .box", "v": "#over"}, {"a": "#vs-result .box", "v": "#vs-result"}],AD='https://nasubi-no-oniwa.github.io/ad/';
 if(/[?&]noad=1/.test(location.search))return;
 var ifr=null,boxes=[];
 function vis(e){if(!e||!e.isConnected||e.closest('[hidden]'))return false;var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;for(var n=e;n&&n.nodeType===1;n=n.parentElement){var s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)<0.05)return false;}return true;}
